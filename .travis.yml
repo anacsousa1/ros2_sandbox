@@ -14,9 +14,8 @@ dist: focal
     # - CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls"
     # - WARNINGS_OK=false
 
-# Install all dependencies, namely a very barebones ROS2 setup
+# Setup and install ros2
 before_install:
-  # - sudo apt install git
   - sudo locale-gen en_US en_US.UTF-8
   - sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
   - export LANG=en_US.UTF-8
@@ -25,8 +24,10 @@ before_install:
   - sudo sh -c 'echo "deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list'
   - sudo apt update
   - sudo apt install ros-foxy-ros-base
-  - source /opt/ros/foxy/setup.bash
   - sudo apt install python3-colcon-common-extensions
+  - source /opt/ros/foxy/setup.bash
+  - colcon build
+  - . install/setup.bash
 
 deploy:
   github-token: $GITHUB_TOKEN
