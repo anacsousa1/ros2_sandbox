@@ -1,14 +1,15 @@
 sudo: required
+language: generic
 cache:
   - apt
 os: linux
-language: generic
+dist: focal
 
-env:
-  global:
+# env:
+  # global:
     # - MOVEIT_CI_TRAVIS_TIMEOUT=85
-    - ROS_DITRO=foxy
-    - ROS_REPO=ros
+    # - ROS_DITRO=foxy
+    # - ROS_REPO=ros
     # - UPSTREAM_WORKSPACE=moveit2.repos
     # - CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls"
     # - WARNINGS_OK=false
@@ -26,5 +27,7 @@ before_install:
   - source /opt/ros/foxy/setup.bash
   - sudo apt install python3-colcon-common-extensions
 
+deploy:
+  github-token: $GITHUB_TOKEN
 
 
