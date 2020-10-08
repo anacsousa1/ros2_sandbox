@@ -5,15 +5,6 @@ cache:
 os: linux
 dist: focal
 
-# env:
-  # global:
-    # - MOVEIT_CI_TRAVIS_TIMEOUT=85
-    # - ROS_DITRO=foxy
-    # - ROS_REPO=ros
-    # - UPSTREAM_WORKSPACE=moveit2.repos
-    # - CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls"
-    # - WARNINGS_OK=false
-
 # Setup and install ros2
 before_install:
   - sudo locale-gen en_US en_US.UTF-8
@@ -23,7 +14,7 @@ before_install:
   - curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
   - sudo sh -c 'echo "deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list'
   - sudo apt update
-  - sudo apt install ros-foxy-ros-base
+  - sudo apt install ros-foxy-desktop
   - sudo apt install python3-colcon-common-extensions
   - source /opt/ros/foxy/setup.bash
   - colcon build
