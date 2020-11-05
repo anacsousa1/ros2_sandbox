@@ -4,10 +4,10 @@
 language: generic
 
 sudo: required
-dist: focal   # Focal = Ubuntu 20.04 LST
 cache:
   - apt
 os: linux
+dist: focal   # Focal = Ubuntu 20.04 LST
 
 # Whitelist
 branches:
@@ -15,6 +15,20 @@ branches:
     - main
     - master
     - develop
+
+# Define global variables for OpenSim installation
+env:
+  global:
+    # The python tests look for OPENSIM_HOME.
+    - OPENSIM_HOME=~/opensim-core
+    - OPENSIM_DEPENDENCIES_BUILD_DIR=~/opensim_dependencies-build
+    - OPENSIM_DEPENDENCIES_INSTALL_DIR=~/opensim_dependencies-install
+    - SWIG_VER=3.0.8
+    - PATH="$PATH:$TRAVIS_BUILD_DIR/.github"
+    - USE_CCACHE=1
+    - CCACHE_COMPRESS=1
+    # For Clang to work with ccache.
+    - CCACHE_CPP2=1
 
 # Setup and install ros2
 before_install:
