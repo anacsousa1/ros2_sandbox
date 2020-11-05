@@ -13,6 +13,8 @@ os: linux
 branches:
   only:
     - main
+    - master
+    - develop
 
 # Setup and install ros2
 before_install:
