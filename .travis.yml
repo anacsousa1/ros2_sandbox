@@ -1,9 +1,18 @@
-sudo: required
+# This script is used by the Travis-CI (continuous integration) testing
+# service to run Biospine tests with every GitHub push or pull-request.
+# To learn about this file, go to https://docs.travis-ci.com/user/languages/minimal-and-generic/
 language: generic
+
+sudo: required
+dist: focal   # Focal = Ubuntu 20.04 LST
 cache:
   - apt
 os: linux
-dist: focal
+
+# Whitelist
+branches:
+  only:
+    - main
 
 # Setup and install ros2
 before_install:
