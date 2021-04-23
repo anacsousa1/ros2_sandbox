@@ -1,51 +1,38 @@
-# This script is used by the Travis-CI (continuous integration) testing
-# service to run Biospine tests with every GitHub push or pull-request.
-# To learn about this file, go to https://docs.travis-ci.com/user/languages/minimal-and-generic/
-language: generic
+# This config uses industrial_ci (https://github.com/ros-industrial/industrial_ci.git).
+# For troubleshooting, see readme (https://github.com/ros-industrial/industrial_ci/blob/master/README.rst)
 
-sudo: required
-cache:
-  - apt
-os: linux
-dist: focal   # Focal = Ubuntu 20.04 LST
+language: generic # optional, just removes the language badge
 
-# Whitelist
-branches:
-  only:
-    - main
-    - master
-    - develop
+services:
+  - docker
 
-# Define global variables for OpenSim installation
+# include the following block if the C/C++ build artifacts should get cached by Travis,
+# CCACHE_DIR needs to get set as well to actually fill the cache
+#cache:
+#  directories:
+#    - $HOME/.ccache
+
+git:
+  quiet: true # optional, silences the cloning of the target repository
+
+# configure the build environment(s)
+# https://github.com/ros-industrial/industrial_ci/blob/master/doc/index.rst#variables-you-can-configure
 env:
-  global:
-    # The python tests look for OPENSIM_HOME.
-    - OPENSIM_HOME=~/opensim-core
-    - OPENSIM_DEPENDENCIES_BUILD_DIR=~/opensim_dependencies-build
-    - OPENSIM_DEPENDENCIES_INSTALL_DIR=~/opensim_dependencies-install
-    - SWIG_VER=3.0.8
-    - PATH="$PATH:$TRAVIS_BUILD_DIR/.github"
-    - USE_CCACHE=1
-    - CCACHE_COMPRESS=1
-    # For Clang to work with ccache.
-    - CCACHE_CPP2=1
+  global: # global settings for all jobs
+    - CCACHE_DIR=$HOME/.ccache # enables C/C++ caching in industrial_ci
+  matrix: # each line is a job
+	- ROS_DISTRO="foxy"
+    #- ROS_DISTRO="foxy" ROS_REPO=main # overrides the default
+    #- ROS_DISTRO="kinetic"
+    #- ROS_DISTRO="melodic"
 
-# Setup and install ros2
-before_install:
-  - sudo locale-gen en_US en_US.UTF-8
-  - sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
-  - export LANG=en_US.UTF-8
-  - sudo apt install curl gnupg2 lsb-release
-  - curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
-  - sudo sh -c 'echo "deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list'
-  - sudo apt update
-  - sudo apt install ros-foxy-desktop
-  - sudo apt install python3-colcon-common-extensions
-  - source /opt/ros/foxy/setup.bash
-  - colcon build
-  - . install/setup.bash
+# allow failures, e.g. for unsupported distros
+#matrix:
+#  allow_failures:
+#    - env: ROS_DISTRO="foxy" ROS_REPO=main
 
-deploy:
-  github-token: $GITHUB_TOKEN
-
-
+# clone and run industrial_ci
+install:
+  - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .industrial_ci -b master
+script:
+  - .industrial_ci/travis.sh
