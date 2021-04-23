@@ -1,6 +1,6 @@
 build/
 install/
 log/
-
+.vs/
 
 .travis_opensim.yml

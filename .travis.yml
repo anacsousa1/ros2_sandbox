@@ -1,99 +1,38 @@
-# This script is used by the Travis-CI (continuous integration) testing
-# service to run Biospine tests with every GitHub push or pull-request.
-# To learn about this file, go to https://docs.travis-ci.com/user/languages/minimal-and-generic/
-language: generic
+# This config uses industrial_ci (https://github.com/ros-industrial/industrial_ci.git).
+# For troubleshooting, see readme (https://github.com/ros-industrial/industrial_ci/blob/master/README.rst)
 
-sudo: required
-cache:
-  - apt
-# cache: ccache
-os: linux
-dist: focal   # Focal = Ubuntu 20.04 LST
+language: generic # optional, just removes the language badge
 
-# Whitelist for travis
-branches:
-  only:
-    - main
-    - master
-    - develop
+services:
+  - docker
 
-# Define global variables for OpenSim installation
+# include the following block if the C/C++ build artifacts should get cached by Travis,
+# CCACHE_DIR needs to get set as well to actually fill the cache
+#cache:
+#  directories:
+#    - $HOME/.ccache
+
+git:
+  quiet: true # optional, silences the cloning of the target repository
+
+# configure the build environment(s)
+# https://github.com/ros-industrial/industrial_ci/blob/master/doc/index.rst#variables-you-can-configure
 env:
-  global:
-    # The python tests look for OPENSIM_HOME.
-    - OPENSIM_HOME=~/opensim-core
-    - OPENSIM_DEPENDENCIES_BUILD_DIR=~/opensim_dependencies-build
-    - OPENSIM_DEPENDENCIES_INSTALL_DIR=~/opensim_dependencies-install
-    - SWIG_VER=3.0.8
-    - PATH="$PATH:$TRAVIS_BUILD_DIR/.github"
-    - USE_CCACHE=1
-    - CCACHE_COMPRESS=1
-    # For Clang to work with ccache.
-    - CCACHE_CPP2=1
+  global: # global settings for all jobs
+    - CCACHE_DIR=$HOME/.ccache # enables C/C++ caching in industrial_ci
+  matrix: # each line is a job
+	- ROS_DISTRO="foxy"
+    #- ROS_DISTRO="foxy" ROS_REPO=main # overrides the default
+    #- ROS_DISTRO="kinetic"
+    #- ROS_DISTRO="melodic"
 
-# Dependencies on linux (for OpenSim)
-addons:  
-  apt:
-    sources:
-      # For gcc >= 4.8
-      - ubuntu-toolchain-r-test
-      # for clang
-      - llvm-toolchain-precise-3.5
-      # For cmake >= 2.8.8 (for CMakePackageConfigHelpers)
-      - kubuntu-backports
-      - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
+# allow failures, e.g. for unsupported distros
+#matrix:
+#  allow_failures:
+#    - env: ROS_DISTRO="foxy" ROS_REPO=main
 
-    packages:
-      # Must explicitly list cmake-data, otherwise the incorrect
-      # version of cmake-data will be sought to satisfy the dependencies
-      # of cmake.
-      - cmake-data
-      - cmake
-      # For Simbody.
-      - liblapack-dev
-      # - g++-4.9   # Ubuntu focal already comes with g++ 9.3
-      # - clang-3.5 # Ubuntu focal already comes with clang 10.0
-      # In case someone wants to check for memory leaks.
-      - valgrind
-      # To build doxygen documentation.
-      # TOO OLD; see below. - doxygen
-      # python3 as linux and osx are still on python2
-      - python3
-      - python3-pip
-      - python3-numpy
-  # To avoid being prompted when ssh'ing into sourceforge.
-  ssh_known_hosts:
-      # For uploading doxygen.
-      - web.sourceforge.net
-      # For deleting old doxygen.
-      - shell.sourceforge.net
-      # For uploading binaries.
-      - frs.sourceforge.net
-
-# Setup and install ros2
-before_install:
-  - cd $TRAVIS_BUILD_DIR
-  # Stop build if comment contains [skip travis].
-  - if $(git log -n1 --format="%B" | grep --quiet '\[skip travis\]'); then exit; fi 
-  
-  # OpenSim:
-
-
-  # ROS2:
-  - sudo locale-gen en_US en_US.UTF-8
-  - sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
-  - export LANG=en_US.UTF-8
-  - sudo apt install curl gnupg2 lsb-release
-  - curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
-  - sudo sh -c 'echo "deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list'
-  - sudo apt update
-  - sudo apt install ros-foxy-desktop
-  - sudo apt install python3-colcon-common-extensions
-  - source /opt/ros/foxy/setup.bash
-  - colcon build
-  - . install/setup.bash
-
-deploy:
-  github-token: $GITHUB_TOKEN
-
-
+# clone and run industrial_ci
+install:
+  - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .industrial_ci -b master
+script:
+  - .industrial_ci/travis.sh
